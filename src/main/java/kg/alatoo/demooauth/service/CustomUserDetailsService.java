@@ -63,5 +63,18 @@ public class CustomUserDetailsService implements UserDetailsService, UserService
         Role role = new Role(roleName);
         return roleRepository.save(role);
     }
+    @Override
+    public boolean CreateFirstAdmin(){
+        if (!userRepository.findByUsername("Admin0121").isPresent()){
+            User admin = new User();
+            admin.setUsername("Admin0121");
+            admin.setFirstname("Admin0121");
+            admin.setLastname("Admin0121");
+            admin.setPassword("123");
+            createAdmin(admin);
+            return true;
+        }
+        return false;
+    }
 
 }

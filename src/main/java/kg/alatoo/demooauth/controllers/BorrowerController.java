@@ -10,6 +10,8 @@ import kg.alatoo.demooauth.service.BookService;
 import kg.alatoo.demooauth.service.BorrowerService;
 import kg.alatoo.demooauth.service.MyBookListService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -52,7 +54,11 @@ public class BorrowerController {
         }else {
             List<Book> list = bookService.getAllBooks();
             model.addAttribute("book", list);}
-        return "bookList";
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().toString().contains("ADMIN")) {
+            return "bookList";
+        }
+        return "bookListForUsers";
     }
 
 

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="/order/{id}" th:action="@{/order/{id}}" method="post" th:object="${adress}">
+    <input type="text" name="buying_book_id" th:value="${id}"  placeholder="product_id" readonly>
+    <input type="email" name="email" placeholder="email"  >
+    <input type="text" name="adress" placeholder="adress"  >
+    <input type="text" name="phone" placeholder="phone" >
+    <button type="submit" class="btn btn-info" >Send</button>
+</form>
+
+</body>
+</html>

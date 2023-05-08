@@ -15,6 +15,16 @@ public class Book {
     private String author;
     private String name;
     private String price;
+    private String imageName;
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
     public Book(int id, String author, String name, String price) {
         this.id = id;
         this.author = author;

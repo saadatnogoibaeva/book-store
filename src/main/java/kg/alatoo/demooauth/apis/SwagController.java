@@ -51,7 +51,7 @@ public class SwagController {
     @RequestMapping("/mylist/{id}")
     public String getMyList(@PathVariable("id")int id){
         Book b= bookService.getBookById(id);
-        MyBookList mb=new MyBookList(b.getId(), b.getName(), b.getAuthor(),b.getPrice());
+        MyBookList mb=new MyBookList(b.getId(), b.getName(), b.getAuthor(),b.getPrice(), b.getImageName());
         myBookListService.saveMyBook(mb);
         bookService.deleteById(b.getId());
         return "redirect:/my_books";

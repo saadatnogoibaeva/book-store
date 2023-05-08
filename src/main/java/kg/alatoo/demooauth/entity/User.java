@@ -1,6 +1,7 @@
 package kg.alatoo.demooauth.entity;
 
 import jakarta.persistence.*;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +13,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String firstname, lastname, email, username, password;
+
+    private String username;
+
+    private String firstname, lastname, email, password;
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles = new HashSet<>();

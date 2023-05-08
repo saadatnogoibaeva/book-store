@@ -19,16 +19,29 @@
         <th scope="col">Name</th>
         <th scope="col">Author</th>
         <th scope="col">Price</th>
+        <th scope="col">Image</th>
         <th scope="col">Action</th>
+        <form class="col-md-4 offset-md-4" th:action="@{/available_books}">
+            <div class="mb-3">
+                <select name="keyword">
+                    <tr2 th:each="l : ${listS}">
+                        <option th:value="${l}" th:text="${l}"></option>
+                    </tr2>
 
+                </select>
+            </div>
+            <button type="submit">Sort</button>
+        </form>
     </tr>
     </thead>
     <tbody>
-    <tr th:each="b :${book}">
+    <tr th:each="b :${list}">
         <td th:text="${b.id}"></td>
         <td th:text="${b.name}"></td>
         <td th:text="${b.author}"></td>
         <td th:text="${b.price}"></td>
+        <td><img src="" height="100px" width="100px"  th:src="@{${'/productImages/' + b.imageName}}"></td>
+
         <td>
             <a class="btn btn-secondary btn-sm" th:href="@{/mylist/{id}(id=${b.id})}">Add To My Book</a>
             <a style="color: blue" th:href="@{/editBook/{id}(id=${b. id})}"><i class="fa-solid fa-pen-to-square ms-4"></i></a>

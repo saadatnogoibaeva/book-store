@@ -19,6 +19,7 @@
             <th scope="col">Name</th>
             <th scope="col">Author</th>
             <th scope="col">Price</th>
+            <th scope="col">Image</th>
             <th scope="col">Action</th>
 
         </tr>
@@ -29,7 +30,10 @@
             <td th:text="${b.name}"></td>
             <td th:text="${b.author}"></td>
             <td th:text="${b.price}"></td>
-            <td><a style="color: red" th:href="@{/deleteMyList/{id}(id=${b.id})}"><i class="fa-sharp fa-solid fa-trash"></i> </a></td>
+                <td><img src="" height="100px" width="100px"  th:src="@{${'/productImages/' + b.imageName}}"></td>
+                <td><a style="color: red" th:href="@{/order/{id}(id=${b.id})}"><i>buy</i> </a></td>
+
+                <td><a style="color: red" th:href="@{/deleteMyList/{id}(id=${b.id})}"><i class="fa-sharp fa-solid fa-trash"></i> </a></td>
 
         </tr>
 

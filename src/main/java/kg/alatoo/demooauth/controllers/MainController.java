@@ -1,98 +1,98 @@
 package kg.alatoo.demooauth.controllers;
 
-import kg.alatoo.demooauth.entity.Book;
-import kg.alatoo.demooauth.entity.MyBookList;
-import kg.alatoo.demooauth.entity.Role;
-import kg.alatoo.demooauth.entity.User;
+import kg.alatoo.demooauth.Sender.EmailSenderService;
+import kg.alatoo.demooauth.dto.ProductDTO;
+import kg.alatoo.demooauth.entity.*;
 import kg.alatoo.demooauth.repository.RoleRepository;
 import kg.alatoo.demooauth.repository.UserRepository;
 import kg.alatoo.demooauth.service.BookService;
 import kg.alatoo.demooauth.service.MyBookListService;
 import kg.alatoo.demooauth.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Controller
+@Slf4j
 public class MainController {
 
-  /*  @GetMapping(value = "/",headers = {})
-    public String index() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        System.out.println(principal.getClass().getName());
-        DefaultOAuth2User oAuth2User = (DefaultOAuth2User) principal;
-        System.out.println(oAuth2User.toString());
-        return "home";
-    }*/
+    public  static String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/productImages";
+
+    @Autowired
+    private EmailSenderService senderService;
     @Autowired
     private UserService userService;
     @Autowired
     UserRepository userRepository;
+
     @GetMapping("/") public String homePage(){
-        if(!userRepository.findByUsername("admin01").isPresent()){
-            User user = new User();
-            user.setUsername("admin01");
-            user.setFirstname("user1");
-            user.setLastname("user1");
-            user.setEmail("user1@gmail.com");
-            user.setPassword("123");
-       /* Role role = new Role("ADMIN");
-        user.setRoles((Set<Role>) role);*/
-            userService.createAdmin(user);
+
+        if (userService.CreateFirstAdmin()){
+
         }
-
+        else {
+            System.out.println("Not working");
+        }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println(auth.getAuthorities()+"   ---   "+auth.getName());
 
-        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+        if (auth.getAuthorities().toString().contains("ADMIN")) {
             return "home";
         }
-        System.out.println(auth.getAuthorities());
-        System.out.println(auth.getAuthorities().stream().map(s -> s.getAuthority()));
-        System.out.println(auth.getAuthorities().stream().findAny());
+        if (auth.getAuthorities().toString().contains("USER")) {
+            return "homeForUsers";
+        }
 
-        System.out.println(auth.getName());
-        System.out.println(auth.toString());
-        System.out.println(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN")));
-
-        return "homeForUsers";
+        return "homeL";
 
     }
     @Autowired
     RoleRepository roleRepository;
 
-    protected Role getOrCreateRole(String roleName) {
-        Optional<Role> optionalRole = roleRepository.findById(roleName);
-        if (optionalRole.isPresent()) {
-            return optionalRole.get();
-        }
-        Role role = new Role(roleName);
-        return roleRepository.save(role);
-    }
+    @GetMapping("/login")
+    public String loginPage(){
 
-    @GetMapping("/login") public String loginPage(){return "login";}
-    @GetMapping("/register") public String registerPage(){return "register";}
+        return "login";
+    }
+    @GetMapping("/register") public String registerPage(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth.isAuthenticated()) {
+            return "register";
+        }
+
+        return "registerL";
+    }
     @PostMapping("/register")
     public String postRegister(@ModelAttribute User user){
         userService.createUser(user);
         return "login";
     }
-    @PostMapping("/login")
-    public String postLogin(@ModelAttribute User user){
-        System.out.println("AJLDAJKL");
-        return "homeForUsers";
-    }
 
     @Autowired
     public BookService service;
+
+    @Autowired
+    PasswordEncoder encoder;
+
 
     @Autowired
     private MyBookListService myBookListService;
@@ -100,15 +100,87 @@ public class MainController {
 
 
     @GetMapping("/book_register")
-    public String bookRegister(){
-        return "bookRegister";
+    public String bookRegister(Model model){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        model.addAttribute("productDTO", new ProductDTO());
+
+        if (auth.getAuthorities().toString().contains("ADMIN")) {
+            return "bookRegister";
+        }
+        return "homeForUsers";
     }
+    @PostMapping("/book_register")
+    public String productAddPost(@ModelAttribute("productDTO") ProductDTO productDTO,
+                                 @RequestParam("productImage") MultipartFile file,
+                                 @RequestParam("imgName") String imgName) throws IOException {
 
-    @GetMapping("/available_books")
-    public ModelAndView getAllBook() {
-        List<Book> list = service.getAllBook();
+        Book product = new Book();
+        product.setAuthor(productDTO.getAuthor());
+        product.setName(productDTO.getName());
+        product.setPrice(productDTO.getPrice());
 
-        return new ModelAndView("bookList","book",list);
+
+        String imageUUID;
+
+        if (!file.isEmpty()) {
+            imageUUID = file.getOriginalFilename();
+            Path fileNameAndPath = Paths.get(uploadDir, imageUUID);
+            Files.write(fileNameAndPath, file.getBytes());
+
+        } else {
+            imageUUID = imgName;
+        }
+
+        product.setImageName(imageUUID);
+        service.save(product);
+
+        return "redirect:/available_books";
+    }
+    List<String> listSort = new ArrayList<>();
+
+
+
+
+    @RequestMapping(path = {"/available_books"})
+    public String getAllBook(Model model, String keyword) {
+        listSort.clear();
+        listSort.add("By Author Asc");listSort.add("By Author Desc");listSort.add("By Name Asc");listSort.add("By Name Desc");
+        listSort.add("By Prize Asc");listSort.add("By Prize Desk");listSort.add("By Id Desc");
+        model.addAttribute("listS", listSort);
+
+        if(keyword!=null) {
+            switch (keyword){
+                case "By Author Asc":
+                    model.addAttribute("list", service.bRepo.findByOrderByAuthorAsc());
+                    break;
+                case "By Author Desc":
+                    model.addAttribute("list", service.bRepo.findByOrderByAuthorDesc());
+                    break;
+                case "By Name Asc":
+                    model.addAttribute("list", service.bRepo.findByOrderByNameAsc());
+                    break;
+                case "By Name Desc":
+                    model.addAttribute("list", service.bRepo.findByOrderByNameDesc());
+                    break;
+                case "By Prize Asc":
+                    model.addAttribute("list", service.bRepo.findByOrderByPriceAsc());
+                    break;
+                case "By Prize Desc":
+                    model.addAttribute("list", service.bRepo.findByOrderByPriceDesc());
+                    break;
+            }
+
+
+        }else {
+
+            model.addAttribute("list", service.getAllBooks());
+        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().toString().contains("ADMIN")) {
+            return "bookList";
+        }
+
+        return "bookListForUsers";
     }
     @PostMapping("/save")
     public String addBook(@ModelAttribute Book b){
@@ -119,12 +191,30 @@ public class MainController {
     public String getMyBooks(Model model){
         List<MyBookList>list=myBookListService.getAllMyBooks();
         model.addAttribute("book",list);
-        return "MyBooks";
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth.getAuthorities().toString().contains("ADMIN")) {
+            return "MyBooks";
+        }
+
+        return "MyBooksForUsers";
+    }
+    @GetMapping("/order/{id}")
+    public String orderBookById(@PathVariable("id")int id, Model model){
+        model.addAttribute("product", myBookListService.getById(id));
+        return "sender";
+    }
+    @PostMapping("/order/{id}")
+    public String postOrderById (@ModelAttribute Adress adress, Model model){
+
+        senderService.sendEmail(adress.getEmail(), adress.getAdress(), adress.getPhone(), adress.getBuying_book_id());
+
+
+        return "check";
     }
     @RequestMapping("/mylist/{id}")
     public String getMyList(@PathVariable("id")int id){
         Book b= service.getBookById(id);
-        MyBookList mb=new MyBookList(b.getId(), b.getName(), b.getAuthor(),b.getPrice());
+        MyBookList mb=new MyBookList(b.getId(), b.getName(), b.getAuthor(),b.getPrice(), b.getImageName());
         myBookListService.saveMyBook(mb);
         service.deleteById(b.getId());
         return "redirect:/my_books";
@@ -139,6 +229,8 @@ public class MainController {
     }
     @RequestMapping("/deleteBook/{id}")
     public String deleteBook(@PathVariable("id")int id){
+        Book b = service.getBookById(id);
+
         service.deleteById(id);
         return "redirect:/available_books";
     }

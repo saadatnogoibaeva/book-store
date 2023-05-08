@@ -10,4 +10,6 @@ public interface UserService {
     User createAdmin(User newAdmin);
 
     List<User> findAllUsers();
+
+    boolean CreateFirstAdmin();
 }

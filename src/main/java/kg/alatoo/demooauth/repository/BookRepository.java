@@ -15,4 +15,17 @@ public interface BookRepository extends JpaRepository<Book,Integer> {
     List<Book> findByKeyword(@Param("keyword") String keyword);
 
 
+    List<Book> findByOrderByAuthorAsc();
+    List<Book> findByOrderByAuthorDesc();
+    List<Book> findByOrderByNameAsc();
+    List<Book> findByOrderByNameDesc();
+    List<Book> findByOrderByPriceAsc();
+    List<Book> findByOrderByPriceDesc();
+   /* private int id;
+    private String author;
+    private String name;
+    private String price;*/
+
+
+
 }

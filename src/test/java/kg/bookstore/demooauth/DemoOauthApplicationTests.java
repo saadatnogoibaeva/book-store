@@ -1,4 +1,4 @@
-package kg.alatoo.demooauth;
+package kg.bookstore.demooauth;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
