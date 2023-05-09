@@ -64,3 +64,13 @@ and we have added swagger:
 -----------
 very beautiful)
 ![image](https://user-images.githubusercontent.com/100344838/236874394-cf2e6a23-47c9-4bf4-809f-78451e12cea3.png)
+
+
+```properties
+spring_profiles_active=prod
+PROD_DB_HOST=containers-us-west-139.railway.app
+PROD_DB_PORT=5733
+PROD_DB_NAME=railway
+PROD_DB_USERNAME=postgres
+PROD_DB_PASSWORD=bSmzlH7K3NtTyGAMxfEU
+```
