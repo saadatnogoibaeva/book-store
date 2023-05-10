@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/", true)
                 .permitAll().and()
                 .authorizeHttpRequests((requests) ->requests
-                        .requestMatchers("/", "/register","/login", "/forgot", "/check","/changePassword").permitAll()
+                        .requestMatchers("/","/images/*", "/register","/login", "/forgot", "/check","/changePassword").permitAll()
                         /*.requestMatchers("/admin").hasRole("ADMIN")*/
                         /*.requestMatchers("/borrowers/*","book_register").hasRole("ADMIN")
                          * not working, also 'hasAuthority("ADMIN")*/
